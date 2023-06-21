@@ -1,11 +1,11 @@
 const asyncHandler = require('express-async-handler');
-const goalServices = require('../services/goalServices');
+const goalModel = require('../models/goalModel');
 
 // @desc    Get goals
 // @route   GET /api/goals
 // @access  Private
 const getGoals = asyncHandler(async (req, res) => {
-    const goals = await goalServices.getGoals();
+    const goals = await goalModel.readAll();
 
     res.status(200).json(goals);
 })
@@ -19,7 +19,7 @@ const setGoal = asyncHandler(async (req, res) => {
         throw new Error('Please add a text field');
     }
 
-    const goal = await goalServices.setGoal(req.body.text);
+    const goal = await goalModel.create(req.body.text);
 
     res.status(200).json(goal);
 })
@@ -28,7 +28,7 @@ const setGoal = asyncHandler(async (req, res) => {
 // @route   PUT /api/goals/:id
 // @access  Private
 const updateGoal = asyncHandler(async (req, res) => {
-    const goal = await goalServices.updateGoal(req.params.id, req.body.text);
+    const goal = await goalModel.update(req.params.id, req.body.text);
 
     res.status(200).json(goal);
 })
@@ -37,7 +37,7 @@ const updateGoal = asyncHandler(async (req, res) => {
 // @route   DELETE /api/goals/:id
 // @access  Private
 const deleteGoal = asyncHandler(async (req, res) => {
-    const goal = await goalServices.deleteGoal(req.params.id);
+    const goal = await goalModel.remove(req.params.id);
 
     res.status(200).json(goal);
 })
