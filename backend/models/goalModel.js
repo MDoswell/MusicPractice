@@ -1,40 +1,44 @@
 const db = require('../services/dbServices');
 
-// CREATE TABLE goals (
+// CREATE TABLE goal (
 //     ID int NOT NULL AUTO_INCREMENT,
+//     user_id int NOT NULL,
 //     goal_text VARCHAR(255),
 //     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 //     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-//     PRIMARY KEY(ID)
+//     PRIMARY KEY(ID),
+//     FOREIGN KEY(user_id) REFERENCES user(ID) ON UPDATE CASCADE ON DELETE CASCADE
 // );
 
-async function readAll() {
+async function readAll(id) {
     let sql = `
-        SELECT * FROM goals;
+        SELECT * FROM goal WHERE user_id = ?;
     `
 
-    return await db.query(sql);
+    return await db.query(sql, [id]);
 }
 
-async function read() {
+async function findById(id) {
     let sql = `
-        SELECT * FROM goals WHERE ID = 3;
+        SELECT * FROM goal WHERE ID = ?;
     `
 
-    return await db.query(sql);
+    const goalArr = await db.query(sql, [id]);
+
+    return goalArr[0];
 }
 
-async function create(text) {
+async function create(id, text) {
     let sql = `
-        INSERT INTO goals (goal_text) values (?);
+        INSERT INTO goal (user_id, goal_text) values (?, ?);
     `
 
-    return await db.query(sql, [text]);
+    return await db.query(sql, [id, text]);
 }
 
 async function update(id, text) {
     let sql = `
-        UPDATE goals SET goal_text = ?, update_time = CURRENT_TIMESTAMP WHERE ID = ?;
+        UPDATE goal SET goal_text = ?, update_time = CURRENT_TIMESTAMP WHERE ID = ?;
     `
 
     return await db.query(sql, [text, id]);
@@ -42,7 +46,7 @@ async function update(id, text) {
 
 async function remove(id) {
     let sql = `
-        DELETE FROM goals WHERE ID = ?;
+        DELETE FROM goal WHERE ID = ?;
     `
 
     return await db.query(sql, [id]);
@@ -50,7 +54,7 @@ async function remove(id) {
 
 module.exports = {
     readAll,
-    read,
+    findById,
     create,
     update,
     remove
