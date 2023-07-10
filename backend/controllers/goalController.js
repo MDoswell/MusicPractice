@@ -83,9 +83,16 @@ const deleteGoal = asyncHandler(async (req, res) => {
     res.status(200).json({ id: req.params.id });
 })
 
+const getTest = asyncHandler(async (req, res) => {
+    const testRes = "test successful";
+
+    res.status(200).json(testRes);
+})
+
 module.exports = {
     getGoals,
     setGoal,
     updateGoal,
-    deleteGoal
+    deleteGoal,
+    getTest
 }

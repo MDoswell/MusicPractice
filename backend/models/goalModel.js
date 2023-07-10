@@ -33,7 +33,11 @@ async function create(id, text) {
         INSERT INTO goal (user_id, goal_text) values (?, ?);
     `
 
-    return await db.query(sql, [id, text]);
+    const res = await db.query(sql, [id, text]);
+
+    const goal = findById(res.insertId)
+
+    return goal
 }
 
 async function update(id, text) {
