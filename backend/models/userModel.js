@@ -1,13 +1,13 @@
 const db = require('../services/dbServices');
 
 // CREATE TABLE user (
-//     ID int NOT NULL AUTO_INCREMENT,
+//     id int NOT NULL AUTO_INCREMENT,
 //     user_name VARCHAR(100) NOT NULL,
 //     email VARCHAR(100) NOT NULL,
 //     password VARCHAR(100),
 //     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 //     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-//     PRIMARY KEY(ID),
+//     PRIMARY KEY(id),
 //     UNIQUE(user_name),
 //     UNIQUE(email)
 // );
@@ -22,9 +22,9 @@ async function findOne(field, value, includePass = false) {
 
     if (user) {
         if (includePass) {
-            return { id: user.ID, name: user.user_name, email: user.email, password: user.password }    
+            return { id: user.id, name: user.user_name, email: user.email, password: user.password }    
         } else {
-            return { id: user.ID, name: user.user_name, email: user.email }
+            return { id: user.id, name: user.user_name, email: user.email }
         }
     } else {
         return

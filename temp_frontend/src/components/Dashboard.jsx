@@ -1,28 +1,32 @@
 import { useState, useEffect } from "react"
 import Exercises from "./Exercises"
+import Button from "./Button"
+import Sessions from "./Sessions"
 import AddExercise from "./AddExercise"
 
 const Dashboard = () => {
-    const [goals, setGoals] = useState([])
+    const [sessions, setSessions] = useState([])
+    const [currentSession, setCurrentSession] = useState(null)
 
     useEffect(() => {
-        const getGoals = async () => {
-            const goalsFromServer = await fetchGoals()
-            console.log(goalsFromServer)
-            setGoals(goalsFromServer)
+        const getSessions = async () => {
+            const sessionsFromServer = await fetchSessions()
+            console.log(sessionsFromServer)
+            setSessions(sessionsFromServer)
         }
 
-        getGoals()
+        getSessions()
     }, [])
 
-    const addGoal = async (goal) => {
-        const res = await fetch('/api/goals', {
+    const addSession = async (session) => {
+        console.log(JSON.stringify(session))
+        const res = await fetch('/api/sessions', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
                 "Authorization": `Bearer ${user.token}`
             },
-            body: JSON.stringify(goal)
+            body: JSON.stringify(session)
         })
 
         console.log(res)
@@ -31,9 +35,11 @@ const Dashboard = () => {
 
         console.log(data)
 
-        setGoals([...goals, data])
+        setSessions([...sessions, data])
 
-        console.log(goals)
+        console.log(sessions)
+
+        return data
     }
 
     const user = JSON.parse(localStorage.getItem('user'))
@@ -41,9 +47,9 @@ const Dashboard = () => {
     console.log(user)
     const welcome = user ? `hi ${user.name}` : 'hi nobody'
 
-    const fetchGoals = async () => {
+    const fetchSessions = async () => {
         if (user) {
-            const response = await fetch('/api/goals', {
+            const response = await fetch('/api/sessions', {
                 method: "GET",
                 headers: {
                     "Content-type": "application/json",
@@ -57,12 +63,30 @@ const Dashboard = () => {
         }
     }
 
+    const selectSession = (session) => {
+        const sessionName = session.name ? session.name : 'Untitled session'
+        setCurrentSession({ ...session, name: sessionName })
+    }
+
+    const createSession = async (name) => {
+        const newSession = {
+            user_id: user.id,
+            name: (name ? name : null)
+        }
+
+        const newSessionData = await addSession(newSession)
+
+        console.log(newSessionData)
+
+        selectSession(newSessionData)
+    }
+
     return (
         <>
             <p>{welcome}</p>
-            {/* {goals.map((goal) => (<p key={goal.ID}>{goal.goal_text}</p>))} */}
-            <Exercises exercises={goals} />
-            <AddExercise onAdd={addGoal} />
+            {!currentSession && <Sessions sessions={sessions} onSelect={selectSession} onAdd={createSession} />}
+            {currentSession && <><p>Session: {currentSession.name}</p><p>{currentSession.datetime}</p></>}
+            {currentSession && <Button text={'Clear session'} onClick={() => setCurrentSession(null)} />}
         </>
     )
 }

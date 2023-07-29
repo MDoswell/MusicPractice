@@ -12,7 +12,7 @@ const db = require('../services/dbServices');
 
 async function readAll(id) {
     let sql = `
-        SELECT * FROM goal WHERE user_id = ?;
+        SELECT * FROM session WHERE user_id = ?;
     `
 
     return await db.query(sql, [id]);
@@ -20,7 +20,7 @@ async function readAll(id) {
 
 async function findById(id) {
     let sql = `
-        SELECT * FROM goal WHERE ID = ?;
+        SELECT * FROM session WHERE id = ?;
     `
 
     const goalArr = await db.query(sql, [id]);
@@ -28,29 +28,41 @@ async function findById(id) {
     return goalArr[0];
 }
 
-async function create(id, text) {
-    let sql = `
-        INSERT INTO goal (user_id, goal_text) values (?, ?);
-    `
+async function create(id, name) {
+    if (name) {
+        let sql = `
+            INSERT INTO session (user_id, name, completed) values (?, ?, false);
+        `
+        const res = await db.query(sql, [id, name]);
 
-    const res = await db.query(sql, [id, text]);
+        const goal = findById(res.insertId)
 
-    const goal = findById(res.insertId)
+        return goal
+    } else {
+        let sql = `
+            INSERT INTO session (user_id, completed) values (?, false);
+        `
+        const res = await db.query(sql, [id]);
 
-    return goal
+        const goal = findById(res.insertId)
+
+        return goal
+    }
+
+
 }
 
-async function update(id, text) {
+async function update(id, name, completed) {
     let sql = `
-        UPDATE goal SET goal_text = ?, update_time = CURRENT_TIMESTAMP WHERE ID = ?;
+        UPDATE session SET name = ?, completed = ? WHERE id = ?;
     `
 
-    return await db.query(sql, [text, id]);
+    return await db.query(sql, [name, completed, id]);
 }
 
 async function remove(id) {
     let sql = `
-        DELETE FROM goal WHERE ID = ?;
+        DELETE FROM session WHERE id = ?;
     `
 
     return await db.query(sql, [id]);

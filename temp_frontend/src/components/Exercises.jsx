@@ -4,7 +4,7 @@ const Exercises = ({ exercises }) => {
     return (
         <>
             {exercises.map((exercise) => (
-                <Exercise key={exercise.ID} exercise={exercise} />
+                <Exercise key={exercise.id} exercise={exercise} />
             ))}
         </>
     )

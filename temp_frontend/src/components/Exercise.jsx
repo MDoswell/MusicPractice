@@ -1,6 +1,9 @@
 const Exercise = ({ exercise }) => {
     console.log(exercise)
-    return <p>{exercise.goal_text}</p>
+
+    const exerciseName = exercise.name ? exercise.name : exercise.datetime
+
+    return <p>{exerciseName}</p>
 }
 
 export default Exercise
