@@ -7,7 +7,8 @@ import Footer from "./components/Footer"
 import About from "./components/About"
 import Login from "./pages/Login"
 import TaskDetails from './components/TaskDetails'
-import Dashboard from "./components/Dashboard"
+import Dashboard from "./pages/Dashboard"
+import Exercises from "./pages/Exercises"
 
 function App() {
   const [user, setUser] = useState(null)
@@ -102,6 +103,7 @@ function App() {
         <Routes >
           <Route path="/" element={<Dashboard />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/exercises' element={<Exercises />} />
           <Route path='/about' element={<About />} />
         </Routes>
         <Footer />

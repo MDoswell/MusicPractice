@@ -1,7 +1,7 @@
 import Button from "./Button"
 import EditExercise from "./EditExercise"
 
-const Exercise = ({ exercise, onSelect }) => {
+const SessionExercise = ({ exercise, onSelect }) => {
     console.log(exercise)
     // console.log(editMode)
 
@@ -18,4 +18,4 @@ const Exercise = ({ exercise, onSelect }) => {
     </>
 }
 
-export default Exercise
+export default SessionExercise

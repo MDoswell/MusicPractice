@@ -14,14 +14,18 @@ const Header = ({ title, onAdd, showAdd }) => {
 
 
     return (
-        <header className='header'>
-            <h1>{title}</h1>
-            <Button
-                color={showAdd ? 'grey' : 'green'}
-                text={'Logout'}
-                onClick={logout}
-            />
-        </header>
+        <>
+            <header className='header'>
+                <h1>{title}</h1>
+                <Button
+                    color={showAdd ? 'grey' : 'green'}
+                    text={'Logout'}
+                    onClick={logout}
+                />
+            </header>
+            <a href='/'>Dashboard  </a>
+            <a href='/exercises'>Exercises</a>
+        </>
     )
 }
 
