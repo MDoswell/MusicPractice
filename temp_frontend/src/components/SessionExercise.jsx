@@ -14,7 +14,6 @@ const SessionExercise = ({ exercise, onSelect }) => {
         <p>{exercise.name}</p>
         {/* {editMode && <p>editing...</p>} */}
         <p>{exercise.author}</p>
-        <Button text='Edit' onClick={() => onSelect(exercise)} />
     </>
 }
 

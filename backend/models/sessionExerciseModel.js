@@ -1,58 +1,55 @@
 const db = require('../services/dbServices');
 
-async function readAll(id) {
-    // using user_exercise table...
-    // let sql = `
-    //     SELECT * FROM exercise INNER JOIN user_exercise ON exercise.id = user_exercise.exercise_id AND user_exercise.user_id = ?;
-    // `
-
+async function readAll(sessionId) {
     let sql = `
-        SELECT * FROM exercise WHERE user_id = ?;
+        SELECT * FROM exercise INNER JOIN session_exercise 
+        ON exercise.id = session_exercise.exercise_id 
+        AND session_id = ?;
     `
 
-    return await db.query(sql, [id]);
+    const session = await checkSession(sessionId)
+    const exercises = await db.query(sql, [sessionId]);
+
+    return { session, exercises }
 }
 
-async function findById(id, userId) {
+async function checkSession(sessionId) {
     let sql = `
-        SELECT * FROM exercise WHERE id = ?;
+        SELECT * FROM session WHERE id = ?;
     `
 
-    const exerciseArr = await db.query(sql, [id]);
+    const session = await db.query(sql, [sessionId])
 
-    const exercise = exerciseArr[0]
-
-    return exercise
+    return session[0]
 }
 
-async function create(userId, username, exerciseName, type, description, public) {
+async function findById(sessionId, exerciseId) {
+    let sql = `
+        SELECT * FROM session_exercise WHERE session_id = ? AND exercise_id = ?;
+    `
+}
+
+async function create(sessionId, exerciseId, position, duration, notes) {
     let vals = [
-        exerciseName,
-        type ? type : null,
-        description ? description : null,
-        username,
-        public ? public : false,
-        userId
+        sessionId,
+        exerciseId,
+        position,
+        duration,
+        notes,
+        false  // exercise not completed by default
     ]
 
     let sql = `
-            INSERT INTO exercise (name, type, description, author, public, user_id) values (?, ?, ?, ?, ?, ?);
+            INSERT INTO session_exercise (session_id, exercise_id, position, duration, notes, completed) 
+            VALUES (?, ?, ?, ?, ?, ?);
         `
-    const res = await db.query(sql, vals);
+    const exercise = await db.query(sql, vals);
 
     // await addToUser(userId, res.insertId)
 
-    const exercise = findById(res.insertId)
+    // const exercise = findById(res.insertId)
 
     return exercise
-}
-
-async function addToUser(userId, exerciseId) {
-    sql = `
-        INSERT INTO user_exercise (user_id, exercise_id) values (?, ?)    
-    `
-
-    await db.query(sql, [userId, exerciseId])
 }
 
 async function update(id, name, type, description) {
@@ -76,7 +73,7 @@ async function remove(id) {
 
 module.exports = {
     readAll,
-    findById,
+    checkSession,
     create,
     update,
     remove

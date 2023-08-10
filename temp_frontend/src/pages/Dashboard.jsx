@@ -7,8 +7,9 @@ import SessionExercises from "../components/SessionExercises"
 
 const Dashboard = () => {
     const [sessions, setSessions] = useState([])
+    const [exercises, setExercises] = useState([])
     const [currentSession, setCurrentSession] = useState(null)
-    // const [sessionExercises, setSessionExercises] = useState([])
+    const [sessionExercises, setSessionExercises] = useState([])
 
     useEffect(() => {
         const getSessions = async () => {
@@ -18,6 +19,7 @@ const Dashboard = () => {
         }
 
         getSessions()
+        getExercises()
     }, [])
 
     const addSession = async (session) => {
@@ -68,6 +70,12 @@ const Dashboard = () => {
     const selectSession = (session) => {
         const sessionName = session.name ? session.name : 'Untitled session'
         setCurrentSession({ ...session, name: sessionName })
+        getSessionExercises(session.id)
+    }
+
+    const clearSession = () => {
+        setCurrentSession(null)
+        setSessionExercises([])
     }
 
     const createSession = async (name) => {
@@ -83,35 +91,87 @@ const Dashboard = () => {
         selectSession(newSessionData)
     }
 
-    // const getSessionExercises = async () => {
-    //     const sessionExercisesFromServer = await fetchSessionExercises()
-    //     console.log(sessionExercisesFromServer)
-    //     setSessionExercises(sessionExercisesFromServer)
-    // }
+    const getSessionExercises = async (sessionId) => {
+        const sessionExercisesFromServer = await fetchSessionExercises(sessionId)
+        console.log(sessionExercisesFromServer)
+        setSessionExercises(sessionExercisesFromServer)
+    }
 
-    // const fetchSessionExercises = async () => {
-    //     if (user) {
-    //         const response = await fetch('/api/sessions', {
-    //             method: "GET",
-    //             headers: {
-    //                 "Content-type": "application/json",
-    //                 "Authorization": `Bearer ${user.token}`
-    //             }
-    //         })
+    const fetchSessionExercises = async (sessionId) => {
+        if (user && sessionId) {
+            const response = await fetch(`/api/exercises/session/${sessionId}`, {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                }
+            })
 
-    //         const data = await response.json()
-    //         console.log(data)
-    //         return data
-    //     }
-    // }
+            const data = await response.json()
+            console.log(data)
+            return data
+        }
+    }
+
+    const getExercises = async () => {
+        const exercisesFromServer = await fetchExercises()
+        console.log(exercisesFromServer)
+        setExercises(exercisesFromServer)
+    }
+
+    const fetchExercises = async () => {
+        if (user) {
+            const response = await fetch('/api/exercises/', {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                }
+            })
+
+            const data = await response.json()
+            console.log(data)
+            return data
+        }
+    }
+
+    const addSessionExercise = async (sessionId, exerciseId, position, duration, notes) => {
+        const newSessionExercise = {
+            sessionId: sessionId,
+            exerciseId: exerciseId,
+            position: position,
+            duration: duration,
+            notes: notes
+        }
+
+        if (user && sessionId) {
+            const response = await fetch(`api/exercises/session/${sessionId}`, {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify(newSessionExercise)
+            })
+
+            const data = await response.json()
+            console.log('Adding session exercise:', data)
+            // return data
+        }
+    }
 
     return (
         <>
             <p>{welcome}</p>
             {!currentSession && <Sessions sessions={sessions} onSelect={selectSession} onAdd={createSession} />}
             {currentSession && <><p>Session: {currentSession.name}</p><p>{currentSession.datetime}</p></>}
-            {currentSession && <Button text={'Clear session'} onClick={() => setCurrentSession(null)} />}
-            {/* {currentSession && <SessionExercises />} */}
+            {currentSession && <Button text={'Clear session'} onClick={() => clearSession()} />}
+            {currentSession && <SessionExercises
+                session={currentSession}
+                exercises={exercises}
+                sessionExercises={sessionExercises}
+                onAdd={addSessionExercise}
+            />}
         </>
     )
 }
