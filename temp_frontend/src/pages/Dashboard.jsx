@@ -1,17 +1,28 @@
 import { useState, useEffect } from "react"
-import Exercises from "../components/ExerciseList"
 import Button from "../components/Button"
 import Sessions from "../components/Sessions"
-import AddExercise from "../components/AddExercise"
 import SessionExercises from "../components/SessionExercises"
+import { useNavigate } from "react-router-dom"
 
 const Dashboard = () => {
+    const navigate = useNavigate()
+
+    const user = JSON.parse(localStorage.getItem('user'))
+
+    // if (!user) {
+    //     navigate('/login')
+    // }
+
     const [sessions, setSessions] = useState([])
     const [exercises, setExercises] = useState([])
     const [currentSession, setCurrentSession] = useState(null)
     const [sessionExercises, setSessionExercises] = useState([])
 
     useEffect(() => {
+        if (!user) {
+            navigate('/login')
+        }
+
         const getSessions = async () => {
             const sessionsFromServer = await fetchSessions()
             console.log(sessionsFromServer)
@@ -45,8 +56,6 @@ const Dashboard = () => {
 
         return data
     }
-
-    const user = JSON.parse(localStorage.getItem('user'))
 
     console.log(user)
     const welcome = user ? `hi ${user.name}` : 'hi nobody'
@@ -113,6 +122,13 @@ const Dashboard = () => {
         }
     }
 
+    const updateSessionExercises = async (updatedExercise, origPosition) => {
+        const newSessionExercises = [...sessionExercises]
+        newSessionExercises.splice(origPosition, 1)
+
+        setSessionExercises([...newSessionExercises, updatedExercise])
+    }
+
     const getExercises = async () => {
         const exercisesFromServer = await fetchExercises()
         console.log(exercisesFromServer)
@@ -140,7 +156,8 @@ const Dashboard = () => {
             sessionId: sessionId,
             exerciseId: exerciseId,
             position: position,
-            duration: duration,
+            completed: 0, // not completed by default
+            duration: duration ? duration : null,
             notes: notes
         }
 
@@ -157,23 +174,29 @@ const Dashboard = () => {
             const data = await response.json()
             console.log('Adding session exercise:', data)
             // return data
+            // console.log("sessionExercises: ", sessionExercises)
+            // console.log("newExercise: ", newSessionExercise)
+            // setSessionExercises(...sessionExercises, newSessionExercise)
+            getSessionExercises(currentSession.id)
         }
     }
 
-    return (
-        <>
-            <p>{welcome}</p>
-            {!currentSession && <Sessions sessions={sessions} onSelect={selectSession} onAdd={createSession} />}
-            {currentSession && <><p>Session: {currentSession.name}</p><p>{currentSession.datetime}</p></>}
-            {currentSession && <Button text={'Clear session'} onClick={() => clearSession()} />}
-            {currentSession && <SessionExercises
-                session={currentSession}
-                exercises={exercises}
-                sessionExercises={sessionExercises}
-                onAdd={addSessionExercise}
-            />}
-        </>
-    )
+        return (
+            <>
+                <p>{welcome}</p>
+                {!currentSession && <Sessions sessions={sessions} onSelect={selectSession} onAdd={createSession} />}
+                {currentSession && <><p>Session: {currentSession.name}</p><p>{currentSession.datetime}</p></>}
+                {currentSession && <Button text={'Clear session'} onClick={() => clearSession()} />}
+                {currentSession && <SessionExercises
+                    session={currentSession}
+                    exercises={exercises}
+                    sessionExercises={sessionExercises}
+                    onAdd={addSessionExercise}
+                    onUpdate={updateSessionExercises}
+                />}
+            </>
+        )
+    
 }
 
 export default Dashboard

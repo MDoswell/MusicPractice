@@ -61,14 +61,16 @@ const addSessionExercise = asyncHandler(async (req, res) => {
         req.body.notes
     );
 
+    console.log(exercise)
+
     res.status(200).json(exercise);
 })
 
 // @desc    Update exercise
 // @route   PUT /api/exercises/:id
 // @access  Private
-const updateExercise = asyncHandler(async (req, res) => {
-    const exercise = await sessionExerciseModel.findById(req.params.id);
+const updateSessionExercise = asyncHandler(async (req, res) => {
+    const exercise = await sessionExerciseModel.findById(req.params.sessionId, req.params.exerciseId, req.body.position);
 
     console.log(exercise);
 
@@ -89,13 +91,22 @@ const updateExercise = asyncHandler(async (req, res) => {
         throw new Error('User not authorized');
     }
 
-    const name = req.body.name ? req.body.name : exercise.name
-    const type = req.body.type ? req.body.type : exercise.type
-    const description = req.body.description ? req.body.description : exercise.description
-    // const name = req.body.name ? req.body.name : exercise.name
-    // const completed = req.body.completed ? req.body.completed : session.completed
+    console.log(req.body.completed)
 
-    const updatedExercise = await sessionExerciseModel.update(req.params.id, name, type, description);
+    const duration = req.body.duration ? req.body.duration : exercise.duration
+    const notes = req.body.notes ? req.body.notes : exercise.notes
+    const completed = (req.body.completed === 0 || req.body.completed === 1) ? req.body.completed : exercise.completed
+
+    console.log("completed?", completed)
+
+    const updatedExercise = await sessionExerciseModel.update(
+        req.params.sessionId,
+        req.params.exerciseId,
+        req.body.position,
+        duration,
+        notes,
+        completed
+    );
 
     res.status(200).json(updatedExercise);
 })
@@ -132,6 +143,6 @@ const deleteExercise = asyncHandler(async (req, res) => {
 module.exports = {
     getSessionExercises,
     addSessionExercise,
-    // updateExercise,
+    updateSessionExercise,
     // deleteExercise
 }

@@ -11,9 +11,9 @@ const AddSessionExercise = ({ session, exercises, sessionExercises, onAdd }) => 
 
         console.log('submit pressed')
         console.log(session.id, exerciseId, sessionExercises.length, duration, notes)
-        onAdd(session.id, exerciseId, sessionExercises.length, duration, notes) // sessionId, exercise, position, duration, notes
+        onAdd(session.id, exerciseId, sessionExercises.length, duration, notes)
 
-        // setName('')
+        setExerciseId(null)
     }
 
     console.log(sessionExercises)
@@ -26,8 +26,8 @@ const AddSessionExercise = ({ session, exercises, sessionExercises, onAdd }) => 
             <select name="sessionExercises" onChange={(e) => {
                 console.log(exerciseId)
                 setExerciseId(e.target.value)
-                }}>
-                <option value="" disabled selected>Select an exercise</option>
+            }}>
+                <option value="" disabled selected={!exerciseId}>Select an exercise</option>
                 {exercises.map(exercise => {
                     if (sessionExerciseIds.includes(exercise.id)) {
                         return <option value={exercise.id} disabled>{exercise.name}</option>
@@ -47,7 +47,8 @@ const AddSessionExercise = ({ session, exercises, sessionExercises, onAdd }) => 
                             min='0.5'
                             step='0.5'
                             value={duration}
-                            onChange={(e) => setDuration(e.target.value)} />
+                            onChange={(e) => setDuration(e.target.value)}
+                        />
                     </div>
                     <div className="form-control">
                         <label>Notes (optional)</label>

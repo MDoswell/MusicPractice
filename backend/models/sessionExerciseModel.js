@@ -23,10 +23,17 @@ async function checkSession(sessionId) {
     return session[0]
 }
 
-async function findById(sessionId, exerciseId) {
+async function findById(sessionId, exerciseId, position) {
     let sql = `
-        SELECT * FROM session_exercise WHERE session_id = ? AND exercise_id = ?;
+        SELECT * FROM exercise INNER JOIN session_exercise 
+        ON exercise.id = session_exercise.exercise_id
+        WHERE session_id = ? AND exercise_id = ? AND position = ?;
     `
+    const exerciseArr = await db.query(sql, [sessionId, exerciseId, position]);
+
+    const exercise = exerciseArr[0]
+
+    return exercise
 }
 
 async function create(sessionId, exerciseId, position, duration, notes) {
@@ -43,6 +50,8 @@ async function create(sessionId, exerciseId, position, duration, notes) {
             INSERT INTO session_exercise (session_id, exercise_id, position, duration, notes, completed) 
             VALUES (?, ?, ?, ?, ?, ?);
         `
+
+    console.log('querying...')
     const exercise = await db.query(sql, vals);
 
     // await addToUser(userId, res.insertId)
@@ -52,16 +61,27 @@ async function create(sessionId, exerciseId, position, duration, notes) {
     return exercise
 }
 
-async function update(id, name, type, description) {
+async function update(sessionId, exerciseId, position, duration, notes, completed) {
+    let vals = [duration, notes, completed, sessionId, exerciseId, position]
+
     let sql = `
-        UPDATE exercise 
-        SET name = ?, type = ?, description = ? 
-        WHERE id = ?;
+        UPDATE session_exercise 
+        SET duration = ?, notes = ?, completed = ? 
+        WHERE session_id = ? AND exercise_id = ? AND position = ?;
     
     `
 
-    return await db.query(sql, [name, type, description, id]);
+    return await db.query(sql, vals);
 }
+
+// Updating positions:
+// UPDATE session_exercise 
+//      SET position = CASE
+//          WHEN position < 3 THEN position 
+//          WHEN position = 3 THEN 20 
+//          WHEN position > 3 WHEN position+1 
+//      END
+// WHERE session_id = 2;
 
 async function remove(id) {
     let sql = `
@@ -75,6 +95,7 @@ module.exports = {
     readAll,
     checkSession,
     create,
+    findById,
     update,
     remove
 };
