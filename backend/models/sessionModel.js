@@ -29,27 +29,16 @@ async function findById(id) {
 }
 
 async function create(id, name) {
-    if (name) {
-        let sql = `
-            INSERT INTO session (user_id, name, completed) values (?, ?, false);
-        `
-        const res = await db.query(sql, [id, name]);
+    let sessionName = name ? name : null
 
-        const goal = findById(res.insertId)
+    let sql = `
+        INSERT INTO session (user_id, name, completed) values (?, ?, false);
+    `
+    const res = await db.query(sql, [id, sessionName]);
 
-        return goal
-    } else {
-        let sql = `
-            INSERT INTO session (user_id, completed) values (?, false);
-        `
-        const res = await db.query(sql, [id]);
+    const session = findById(res.insertId)
 
-        const goal = findById(res.insertId)
-
-        return goal
-    }
-
-
+    return session
 }
 
 async function update(id, name, completed) {

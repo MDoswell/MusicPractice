@@ -1,35 +1,56 @@
 import { useState } from "react"
 
 const AddExercise = ({ onAdd }) => {
-    const [title, setTitle] = useState('')
-    // const [description, setDescription] = useState('')
+    const [name, setName] = useState('')
+    const [type, setType] = useState('')
+    const [description, setDescription] = useState('')
+    const [isPublic, setIsPublic] = useState(false)
 
     const onSubmit = (e) => {
         e.preventDefault()
 
-        if (!title) {
-            alert('Please add a goal')
+        if (!name) {
+            alert('Exercise needs a name')
             return
         }
 
-        onAdd({ text: title })
+        onAdd({
+            name: name,
+            type: type,
+            description: description,
+            isPublic: isPublic
+        })
+        //userId, username, exerciseName, type, description, public
+        //name, type, description, author, public, user_id
+        //req.user.id, req.user.name, req.body.name, req.body.type, req.body.description, req.body.isPublic
 
-        setTitle('')
+        setName('')
     }
 
     return (
-        <form className="add-form" onSubmit={onSubmit}>
-            <div className="form-control">
-                <label>Title</label>
-                <input type="text" placeholder="Add Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-            {/* <div className="form-control">
-                <label>Description</label>
-                <input type="text" placeholder="Add Description" value={day} onChange={(e) => setDay(e.target.value)} />
-            </div> */}
+        <div className="container">
+            <h3>Add Exercise</h3>
+            <form className="add-form" onSubmit={onSubmit}>
+                <div className="form-control">
+                    <label>Name</label>
+                    <input type="text" placeholder="Add Name" value={name} onChange={(e) => setName(e.target.value)} />
+                </div>
+                <div className="form-control">
+                    <label>Type</label>
+                    <input type="text" placeholder="Add Type" value={type} onChange={(e) => setType(e.target.value)} />
+                </div>
+                <div className="form-control">
+                    <label>Description</label>
+                    <input type="text" placeholder="Add Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+                </div>
+                <div className="form-control">
+                    <label>Public?</label>
+                    <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+                </div>
 
-            <input type="submit" value='Add Exercise' className="btn btn-block" />
-        </form>
+                <input type="submit" value='Add Exercise' className="btn btn-block" />
+            </form>
+        </div>
     )
 }
 

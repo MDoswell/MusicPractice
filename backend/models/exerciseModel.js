@@ -13,7 +13,7 @@ async function readAll(id) {
     return await db.query(sql, [id]);
 }
 
-async function findById(id, userId) {
+async function findById(id) {
     let sql = `
         SELECT * FROM exercise WHERE id = ?;
     `

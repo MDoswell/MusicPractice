@@ -9,6 +9,7 @@ import Login from "./pages/Login"
 import TaskDetails from './components/TaskDetails'
 import Dashboard from "./pages/Dashboard"
 import Exercises from "./pages/Exercises"
+import Practice from "./pages/Practice"
 
 function App() {
   const [user, setUser] = useState(null)
@@ -102,6 +103,7 @@ function App() {
         <Header onAdd={() => setShowAddTask(!showAddTask)} showAdd={showAddTask} />
         <Routes >
           <Route path="/" element={<Dashboard />} />
+          <Route path="/practice" element={<Practice />} />
           <Route path='/login' element={<Login />} />
           <Route path='/exercises' element={<Exercises />} />
           <Route path='/about' element={<About />} />

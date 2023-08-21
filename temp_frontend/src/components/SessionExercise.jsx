@@ -2,7 +2,7 @@ import Button from "./Button"
 import EditExercise from "./EditExercise"
 import EditSessionExercise from "./EditSessionExercise"
 
-const SessionExercise = ({ sessionId, exercise, editMode, onSelect, onUpdate, onClear }) => {
+const SessionExercise = ({ sessionId, exercise, numExercises, editMode, onSelect, onUpdate, onClear, onUpdatePositions, onDelete }) => {
     console.log(editMode)
     // console.log(editMode)
 
@@ -29,11 +29,30 @@ const SessionExercise = ({ sessionId, exercise, editMode, onSelect, onUpdate, on
         }
     }
 
+    // const removeExercise = async (exercise) => {
+    //     console.log("deleting ", exercise)
+
+    //     if (user) {
+    //         console.log('deleting...')
+    //         const response = await fetch(`/api/exercises/session/${exercise.session_id}/${exercise.exercise_id}`, {
+    //             method: "DELETE",
+    //             headers: {
+    //                 "Content-type": "application/json",
+    //                 "Authorization": `Bearer ${user.token}`
+    //             },
+    //             body: JSON.stringify({position: exercise.position})
+    //         })
+
+    //         const data = await response.json()
+    //         console.log(data)
+    //         // onUpdate(updated, updated.position)
+    //         return data
+    //     }
+    // }
+
     return <div className="task">
-        {/* {editMode && <EditExercise exercise={exercise} />} */}
         <p>{exercise.name}</p>
-        {/* {editMode && <p>editing...</p>} */}
-        <p>{exercise.author}</p>
+        <p>{exercise.position}</p>
         {exercise.completed === 1 && <p>Complete</p>}
         {
             editMode &&
@@ -48,7 +67,16 @@ const SessionExercise = ({ sessionId, exercise, editMode, onSelect, onUpdate, on
             !editMode &&
             <Button text={'Edit'} onClick={onSelect} />
         }
+        {
+            (exercise.position > 0) &&
+            <Button text={'move up'} onClick={() => onUpdatePositions(exercise, exercise.position - 1)} />
+        }
+        {
+            (exercise.position < (numExercises - 1)) &&
+            <Button text={'move down'} onClick={() => onUpdatePositions(exercise, exercise.position + 1)} />
+        }
         <Button text={"Complete"} onClick={() => updateCompleted(sessionId, exercise)} />
+        <Button text={"Delete"} onClick={() => onDelete(exercise, numExercises)} />
     </div>
 }
 

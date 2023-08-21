@@ -19,7 +19,7 @@ const createExercise = asyncHandler(async (req, res) => {
         throw new Error('Please enter a name');
     }
 
-    const exercise = await exerciseModel.create(req.user.id, req.user.name, req.body.name, req.body.type, req.body.description, req.body.public);
+    const exercise = await exerciseModel.create(req.user.id, req.user.name, req.body.name, req.body.type, req.body.description, req.body.isPublic);
 
     res.status(200).json(exercise);
 })
@@ -68,7 +68,7 @@ const deleteExercise = asyncHandler(async (req, res) => {
 
     if (!exercise) {
         res.status(400);
-        throw new Error('Session not found');
+        throw new Error('Exercise not found');
     }
 
     // Check for user

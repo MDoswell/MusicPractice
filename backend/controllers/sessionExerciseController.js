@@ -53,12 +53,24 @@ const addSessionExercise = asyncHandler(async (req, res) => {
         throw new Error('User not authorized');
     }
 
+    // const exercise = await sessionExerciseModel.create(
+    //     req.params.sessionId,
+    //     req.body.exerciseId,
+    //     req.body.position,
+    //     req.body.duration,
+    //     req.body.notes
+    // );
+
+    console.log('session exercises: ', req.body.sessionExercises)
+
+    if (req.body.sessionExercises.length < 1) {
+        res.status(400);
+        throw new Error('No exercises to add')
+    }
+
     const exercise = await sessionExerciseModel.create(
         req.params.sessionId,
-        req.body.exerciseId,
-        req.body.position,
-        req.body.duration,
-        req.body.notes
+        req.body.sessionExercises
     );
 
     console.log(exercise)
@@ -111,13 +123,15 @@ const updateSessionExercise = asyncHandler(async (req, res) => {
     res.status(200).json(updatedExercise);
 })
 
-// @desc    Delete exercise
-// @route   DELETE /api/exercises/:id
+// @desc    Update exercise
+// @route   PUT /api/exercises/:id
 // @access  Private
-const deleteExercise = asyncHandler(async (req, res) => {
-    const exercise = await exerciseModel.findById(req.params.id);
+const updateSessionExercisePositions = asyncHandler(async (req, res) => {
+    const session = await sessionExerciseModel.checkSession(req.params.sessionId)
 
-    if (!exercise) {
+    console.log(session);
+
+    if (!session) {
         res.status(400);
         throw new Error('Session not found');
     }
@@ -129,20 +143,56 @@ const deleteExercise = asyncHandler(async (req, res) => {
     }
 
     // Make sure logged in user matches goal user
-    console.log(exercise.user_id, req.user.id)
+    if (session.user_id !== req.user.id) {
+        res.status(401);
+        throw new Error('User not authorized');
+    }
+
+    console.log(req.body.origPos, req.body.newPos)
+
+    const updatedExercises = await sessionExerciseModel.updatePositions(req.params.sessionId, req.body.origPos, req.body.newPos);
+
+    res.status(200).json(updatedExercises);
+})
+
+// @desc    Delete exercise
+// @route   DELETE /api/exercises/:id
+// @access  Private
+const deleteSessionExercise = asyncHandler(async (req, res) => {
+    const exercise = await sessionExerciseModel.findById(req.params.sessionId, req.params.exerciseId, req.body.position);
+
+    console.log("exercise: ", exercise);
+
+    if (!exercise) {
+        res.status(400);
+        throw new Error('Exercise not found');
+    }
+
+    // Check for user
+    if (!req.user) {
+        res.status(401);
+        throw new Error('User not found');
+    }
+
+    // Make sure logged in user matches goal user
     if (exercise.user_id !== req.user.id) {
         res.status(401);
         throw new Error('User not authorized');
     }
 
-    await exerciseModel.remove(req.params.id);
+    await sessionExerciseModel.remove(
+        req.params.sessionId,
+        req.params.exerciseId,
+        req.body.position,
+    );
 
-    res.status(200).json({ id: req.params.id });
+    res.status(200).json({session: req.params.sessionId, exercise: req.params.exerciseId});
 })
 
 module.exports = {
     getSessionExercises,
     addSessionExercise,
     updateSessionExercise,
-    // deleteExercise
+    updateSessionExercisePositions,
+    deleteSessionExercise
 }

@@ -98,6 +98,8 @@ const Dashboard = () => {
         console.log(newSessionData)
 
         selectSession(newSessionData)
+
+        return newSessionData
     }
 
     const getSessionExercises = async (sessionId) => {
@@ -151,14 +153,22 @@ const Dashboard = () => {
         }
     }
 
-    const addSessionExercise = async (sessionId, exerciseId, position, duration, notes) => {
-        const newSessionExercise = {
+    // const addSessionExercise = async (sessionId, exerciseId, position, duration, notes) => {
+    const addSessionExercise = async (sessionId, sessionExercises) => {
+        // const newSessionExercises = {
+        //     sessionId: sessionId,
+        //     exerciseId: exerciseId,
+        //     position: position,
+        //     completed: 0, // not completed by default
+        //     duration: duration ? duration : null,
+        //     notes: notes
+        // }
+
+        console.log('new session exercises: ', sessionExercises)
+
+        const newSessionExercises = {
             sessionId: sessionId,
-            exerciseId: exerciseId,
-            position: position,
-            completed: 0, // not completed by default
-            duration: duration ? duration : null,
-            notes: notes
+            sessionExercises: sessionExercises
         }
 
         if (user && sessionId) {
@@ -168,7 +178,7 @@ const Dashboard = () => {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${user.token}`
                 },
-                body: JSON.stringify(newSessionExercise)
+                body: JSON.stringify(newSessionExercises)
             })
 
             const data = await response.json()
@@ -181,22 +191,97 @@ const Dashboard = () => {
         }
     }
 
-        return (
-            <>
-                <p>{welcome}</p>
-                {!currentSession && <Sessions sessions={sessions} onSelect={selectSession} onAdd={createSession} />}
-                {currentSession && <><p>Session: {currentSession.name}</p><p>{currentSession.datetime}</p></>}
-                {currentSession && <Button text={'Clear session'} onClick={() => clearSession()} />}
-                {currentSession && <SessionExercises
-                    session={currentSession}
-                    exercises={exercises}
-                    sessionExercises={sessionExercises}
-                    onAdd={addSessionExercise}
-                    onUpdate={updateSessionExercises}
-                />}
-            </>
-        )
-    
+    const updatePositions = async (exercise, newPos) => {
+        console.log(`moving exercise at ${exercise.position} to ${newPos}`);
+
+        if (user) {
+            console.log('moving...')
+            const response = await fetch(`/api/exercises/session/${exercise.session_id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ sessionId: exercise.session_id, origPos: exercise.position, newPos: newPos })
+            })
+
+            const data = await response.json()
+            console.log(data)
+            setSessionExercises(data)
+            return data
+        }
+    }
+
+    const removeSessionExercise = async (exercise, numExercises) => {
+        console.log("deleting ", exercise)
+
+        if (user) {
+            console.log('deleting...')
+            const response = await fetch(`/api/exercises/session/${exercise.session_id}/${exercise.exercise_id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ position: exercise.position })
+            })
+
+            const data = await response.json()
+            console.log(data)
+            updatePositions(exercise, numExercises)
+            return data
+        }
+    }
+
+    const practiceSession = async () => {
+        if (currentSession) {
+            const newSessionData = await createSession(currentSession.name)
+            console.log(newSessionData)
+
+            const newSessionExercises = []
+            sessionExercises.forEach((exercise) => {
+                newSessionExercises.push({
+                    ...exercise,
+                    session_id: newSessionData.id,
+
+                })
+            })
+
+            addSessionExercise(newSessionData.id, newSessionExercises)
+            navigate('/practice', { state: newSessionData })
+        }
+    }
+
+    const practiceNewSession = async (name) => {
+        const newSession = await createSession(name)
+        navigate('/practice', { state: newSession })
+    }
+
+    const practiceOldSession = async (session) => {
+        navigate('/practice', { state: currentSession })
+    }
+
+    return (
+        <>
+            <p>{welcome}</p>
+            {!currentSession && <Sessions sessions={sessions} onSelect={selectSession} onAdd={practiceNewSession} />}
+            {currentSession && <><p>Session: {currentSession.name}</p><p>{currentSession.datetime}</p></>}
+            {currentSession && <Button text={'Use session'} onClick={() => practiceOldSession()} />}
+            {currentSession && <Button text={'Copy session'} onClick={() => practiceSession()} />}
+            {currentSession && <Button text={'Clear session'} onClick={() => clearSession()} />}
+            {currentSession && <SessionExercises
+                user={user}
+                session={currentSession}
+                exercises={exercises}
+                sessionExercises={sessionExercises}
+                onAdd={addSessionExercise}
+                onUpdate={updateSessionExercises}
+                onUpdatePositions={updatePositions}
+                onDelete={removeSessionExercise}
+            />}
+        </>
+    )
+
 }
 
 export default Dashboard

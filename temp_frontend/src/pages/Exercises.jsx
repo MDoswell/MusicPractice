@@ -81,6 +81,27 @@ const Exercises = () => {
         setExerciseList(updatedExercises)
     }
 
+    const deleteExercise = async (exercise) => {
+        const updated = exerciseList.filter((listExercise) => (listExercise.id !== exercise.id))
+        console.log('Exercises minus delete:', updated)
+
+        if (user) {
+            console.log('deleting...')
+            const response = await fetch(`/api/exercises/${exercise.id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
+                }
+            })
+
+            const data = await response.json()
+            console.log(data)
+            setExerciseList(updated)
+            return data
+        }
+    }
+
     // const selectSession = (session) => {
     //     const sessionName = session.name ? session.name : 'Untitled session'
     //     setCurrentSession({ ...session, name: sessionName })
@@ -112,7 +133,9 @@ const Exercises = () => {
                 onSelect={editExercise}
                 onUpdate={updateExerciseList}
                 onClear={() => setExerciseToEdit(null)}
+                onDelete={deleteExercise}
             />
+            <AddExercise onAdd={addExercise} />
         </>
     )
 }

@@ -14,7 +14,7 @@ const AddSession = ({ onAdd }) => {
 
     return (
         <form className="add-form" onSubmit={onSubmit}>
-            <input type="submit" value='New session' className="btn" />
+            <input type="submit" value='New blank session' className="btn" />
             <input type="text" placeholder="Session name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
             {/* <div className="form-control">
                 <label>Description</label>
