@@ -3,8 +3,8 @@ import AddSessionExercise from "./AddSessionExercise"
 import SessionExercise from "./SessionExercise"
 import { useState, useEffect } from "react"
 
-const SessionExercises = ({ user, session, exercises, onAdd, onUpdate, onUpdatePositions, onDelete }) => {
-    const [sessionExercises, setSessionExercises] = useState([])
+const SessionExercises = ({ user, session, sessionExercises, onUpdateList, exercisePlaying, onUpdatePlaying, exercises, onAdd, onUpdate, onUpdatePositions, onDelete }) => {
+    // const [sessionExercises, setSessionExercises] = useState([])
     // const [exercises, setExercises] = useState([])
     const [exerciseToEdit, setExerciseToEdit] = useState(null)
 
@@ -14,13 +14,19 @@ const SessionExercises = ({ user, session, exercises, onAdd, onUpdate, onUpdateP
         // }
 
         getSessionExercises()
+        // console.log('in use effect', sessionExercises)
+        // if (sessionExercises.length > 0) {
+        //     console.log('setting playing pos...')
+        //     onUpdatePlaying(0)
+        // }
+        
         // getExercises()
     }, [])
 
     const getSessionExercises = async () => {
         const sessionExercisesFromServer = await fetchSessionExercises(session.id)
         console.log(sessionExercisesFromServer)
-        setSessionExercises(sessionExercisesFromServer)
+        onUpdateList(sessionExercisesFromServer, null)
     }
 
     const fetchSessionExercises = async (sessionId) => {
@@ -43,7 +49,7 @@ const SessionExercises = ({ user, session, exercises, onAdd, onUpdate, onUpdateP
         const newSessionExercises = [...sessionExercises]
         newSessionExercises.splice(origPosition, 1)
 
-        setSessionExercises([...newSessionExercises, updatedExercise])
+        onUpdateList([...newSessionExercises, updatedExercise], exercisePlaying)
     } 
 
     const updatePositions = async (exercise, newPos) => {
@@ -62,8 +68,21 @@ const SessionExercises = ({ user, session, exercises, onAdd, onUpdate, onUpdateP
 
             const data = await response.json()
             console.log(data)
-            setSessionExercises(data)
+            const newPlayingPos = getPlayingPosition(exercise.position, newPos)
+            onUpdateList(data, newPlayingPos)
             return data
+        }
+    }
+
+    const getPlayingPosition = (oldPos, newPos) => {
+        if (exercisePlaying == oldPos) {
+            return newPos
+        } else if (exercisePlaying > oldPos && exercisePlaying <= newPos) {
+            return exercisePlaying - 1
+        } else if (exercisePlaying >= newPos && exercisePlaying < oldPos) {
+            return exercisePlaying + 1
+        }else {
+            return exercisePlaying
         }
     }
 
@@ -109,7 +128,7 @@ const SessionExercises = ({ user, session, exercises, onAdd, onUpdate, onUpdateP
                 />
             ))}
             {sessionExercises.length === 0 && <p>This session has no exercises. Add some!</p>}
-            {/* <AddSessionExercise user={user} session={session} sessionExercises={sessionExercises} onAdd={setSessionExercises} /> */}
+            <AddSessionExercise user={user} session={session} sessionExercises={sessionExercises} onAdd={(exercises) => onUpdateList(exercises, exercisePlaying)} />
         </>
     )
 }
